@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدقق العقود الشرعي الذكي - المتطور</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white !important; }
+            main { border: none !important; box-shadow: none !important; margin: 0 !important; width: 100% !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col justify-between">
+
+    <header class="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 text-white p-6 shadow-xl border-b-4 border-amber-500 no-print">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-extrabold flex items-center gap-2">
+                    <span>📜</span> مدقق العقود الشرعي الذكي
+                </h1>
+                <p class="text-emerald-200 text-sm mt-1">منصة التحليل الفقهي الآلي واقتراح البدائل الشرعية للعقود</p>
+            </div>
+            <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 text-xs px-3 py-1.5 rounded-full font-bold">
+                نسخة التعديل التلقائي V2
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto m-6 p-6 md:p-8 bg-white rounded-2xl shadow-xl border border-slate-200/80 flex-grow w-full">
+        
+        <div class="no-print mb-6">
+            <label for="contractText" class="block font-bold text-slate-700 mb-2 text-lg">
+                📝 أدخلي نص العقد المراد تحليله وتعديله:
+            </label>
+            <textarea id="contractText" rows="6" 
+                class="w-full p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 focus:outline-none transition shadow-sm text-slate-800 placeholder-slate-400 leading-relaxed" 
+                placeholder="ضع نص العقد هنا... مثال: يتعهد الطرف الثاني بدفع المبلغ، وفي حالة التأخير تجب عليه فائدة 5% كغرامة تأخير بسعر السوق غير المحدد..."></textarea>
+            
+            <div class="flex flex-wrap gap-3 mt-4">
+                <button onclick="analyzeContract()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg transition flex items-center justify-center gap-2 flex-1 md:flex-initial">
+                    <span>🔍</span> فحص العقد واقتراح البدائل
+                </button>
+                <button onclick="clearText()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3.5 px-6 rounded-xl transition">
+                    مسح النص
+                </button>
+            </div>
+        </div>
+
+        <div id="results" class="hidden border-t border-slate-200 pt-6">
+            
+            <div class="flex justify-between items-center mb-6 pb-4 border-b">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+                        📊 تقرير الفحص والبدائل الشرعية
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">التاريخ: <span id="reportDate"></span></p>
+                </div>
+                
+                <button onclick="window.print()" class="no-print bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold py-2.5 px-5 rounded-lg shadow flex items-center gap-2 transition">
+                    <span>🖨️</span> طباعة / حفظ PDF
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-slate-50 border p-5 rounded-xl flex items-center justify-between col-span-2">
+                    <div>
+                        <span class="text-sm font-bold text-slate-600 block">درجة الامتثال والسلامة الشرعية:</span>
+                        <p class="text-xs text-slate-500 mt-0.5" id="scoreDescription">تقييم مبني على القواعد والسياقات الفقهية</p>
+                    </div>
+                    <span id="scoreBadge" class="text-2xl font-black px-5 py-2 rounded-xl text-white shadow-sm">100%</span>
+                </div>
+
+                <div class="bg-slate-50 border p-5 rounded-xl flex items-center justify-between">
+                    <div>
+                        <span class="text-sm font-bold text-slate-600 block">المخالفات والمرئيات:</span>
+                        <span id="issuesCount" class="text-2xl font-black text-slate-800">0 بند</span>
+                    </div>
+                    <span id="statusIcon" class="text-3xl">✅</span>
+                </div>
+            </div>
+
+            <div id="issuesList" class="space-y-4"></div>
+
+            <div class="mt-8 p-4 bg-amber-50/60 border border-amber-200 rounded-xl text-xs text-amber-900 leading-relaxed">
+                ⚖️ <b>إخلاء مسؤولية:</b> التقرير والبدائل المصاغة آلياً هي توجيهات استرشادية مبنية على قواعد فقهية مبرمجة، ويُستحسن دائماً اعتماد الصياغة النهائية لدى جهة فتوى أو مستشار شرعي.
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-400 text-center py-4 text-xs border-t border-slate-700 no-print">
+        مشروع بحثي أكاديمي - مدقق العقود الشرعي الذكي © 2026
+    </footer>
+
+    <script>
+        document.getElementById('reportDate').innerText = new Date().toLocaleDateString('ar-MA', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        async function analyzeContract() {
+            const text = document.getElementById('contractText').value.trim();
+            if(!text) { alert('يرجى أدخال نص العقد أولاً!'); return; }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+                const data = await response.json();
+                displayResults(data);
+            } catch(e) {
+                alert('تأكدي من إعادة تشغيل ملف app.py في الشاشة الكحلة (CMD)!');
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('results').classList.remove('hidden');
+            const scoreBadge = document.getElementById('scoreBadge');
+            const scoreDescription = document.getElementById('scoreDescription');
+            const statusIcon = document.getElementById('statusIcon');
+            const issuesCount = document.getElementById('issuesCount');
+
+            scoreBadge.innerText = data.score + '%';
+            issuesCount.innerText = data.issues.length + ' بند';
+
+            if(data.score === 100) { 
+                scoreBadge.className = "text-2xl font-black px-5 py-2 rounded-xl text-white bg-emerald-600";
+                scoreDescription.innerText = "العقد سليم ومتوافق مع الضوابط الشرعية المبرمجة.";
+                statusIcon.innerText = "✅";
+            } else if(data.score >= 50) { 
+                scoreBadge.className = "text-2xl font-black px-5 py-2 rounded-xl text-white bg-amber-500";
+                scoreDescription.innerText = "العقد يحتاج تعديل بعض البنود والملاحظات الفقهية.";
+                statusIcon.innerText = "⚠️";
+            } else { 
+                scoreBadge.className = "text-2xl font-black px-5 py-2 rounded-xl text-white bg-red-600";
+                scoreDescription.innerText = "العقد يحتوي على شروط ومخالفات شرعية جوهرية.";
+                statusIcon.innerText = "🚨";
+            }
+
+            const issuesList = document.getElementById('issuesList');
+            issuesList.innerHTML = '';
+
+            if(data.issues.length === 0) {
+                issuesList.innerHTML = `<div class="p-5 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-xl">✨ لم يتم العثور على أي شروط فاسدة أو مخالفات شرعية.</div>`;
+                return;
+            }
+
+            data.issues.forEach((issue, idx) => {
+                issuesList.innerHTML += `
+                    <div class="p-5 bg-red-50 border-r-4 border-red-500 rounded-xl shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-extrabold text-red-800 text-lg">🚩 ${issue.title}</h3>
+                            <span class="bg-red-100 text-red-700 text-xs px-2.5 py-1 rounded-full font-bold">بند مخالف</span>
+                        </div>
+                        <p class="text-sm text-slate-700">
+                            <b>الكلمات والسياق المرصود:</b> 
+                            <span class="font-bold text-red-700 bg-red-100/60 px-2 py-0.5 rounded border border-red-200">${issue.matched_words.join(', ')}</span>
+                        </p>
+                        <div class="p-3 bg-white rounded-lg border border-red-100 text-sm text-slate-700">
+                            💡 <b>التوجيه الشرعي:</b> ${issue.advice}
+                        </div>
+                        <div class="p-3.5 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-900">
+                            <div class="flex justify-between items-center mb-1">
+                                <b class="text-emerald-800 flex items-center gap-1">✨ إعادة الصياغة والبديل الشرعي المقترح:</b>
+                                <button onclick="copyToClipboard('redraft-${idx}')" class="no-print text-xs bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-1 rounded shadow transition">📋 نسخ البند</button>
+                            </div>
+                            <p id="redraft-${idx}" class="text-slate-800 font-medium bg-white p-2 rounded border border-emerald-100 mt-1">${issue.redraft}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyToClipboard(id) {
+            const text = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(text);
+            alert('تم نسخ البند الشرعي البديل بنجاح!');
+        }
+
+        function clearText() {
+            document.getElementById('contractText').value = '';
+            document.getElementById('results').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
